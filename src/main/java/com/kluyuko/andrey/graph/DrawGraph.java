@@ -12,11 +12,24 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import com.kluyuko.andrey.calculator.Calculator;
+
+@SuppressWarnings("serial")
 public class DrawGraph extends JFrame {
 
-	public DrawGraph() {
-		super("XY Line Chart Example with JFreechart");
+	private double xExpected[];
+	private double yExpected[];
+	private double xActual[];
+	private double yActual[];
+	private double c[];
+	private Calculator calculator;
 
+	public DrawGraph() {
+		super("Year project");
+		xExpected = new double[10];
+		yExpected = new double[10];
+		yActual = new double[10];
+		c = new double[10];
 		JPanel chartPanel = createChartPanel();
 		add(chartPanel, BorderLayout.CENTER);
 
@@ -46,13 +59,27 @@ public class DrawGraph extends JFrame {
 		for (double i = 0; i < 10.0; i += 0.01) {
 			expected.add(i, Math.sin(i));
 		}
+
+		calculator = new Calculator();
 		// Drawing simulating points
 		XYSeries actual = new XYSeries("some points");
-		for (double i = 1; i < 10.0; i += 1.0) {
-			actual.add(i, Math.sin(i));
+		for (int i = 0; i < xExpected.length; i++) {
+			xExpected[i] = i * 0.2;
+			yExpected[i] = Math.sin(xExpected[i]);
 		}
+		Calculator calculator = new Calculator(xExpected, yExpected);
+		c = calculator.calculateConstants();
+		for (int i = 1; i <= 10; i++) {
+			System.out.println("Approximated value: " + calculator.approximate(c, Math.PI / i));
+		}
+		// for (int i = 0; i < xExpected.length; i++) {
+		// yActual[i] = calculator.approximate(c, xExpected[i]);
+		// System.out.println(yActual[i]);
+		// actual.add(xExpected[i],yActual[i]);
+		// }
+
 		dataset.addSeries(expected);
-		dataset.addSeries(actual);
+		// dataset.addSeries(actual);
 		return dataset;
 	}
 }
