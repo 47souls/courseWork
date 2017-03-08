@@ -1,10 +1,16 @@
 package com.kluyuko.andrey.graph;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -14,11 +20,6 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import com.kluyuko.andrey.calculator.Calculator;
-import javax.swing.BoxLayout;
-import java.awt.Color;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -27,7 +28,19 @@ public class MainFrame extends JFrame {
 	private double yExpected[];
 	private double yActual[];
 	private double constants[];
+
+	// points dataSet
+	private XYDataset dataset;
+	private XYSeries actual;
+	private XYSeries expected;
+
 	private Calculator calculator;
+	private JTextField xValueTextField;
+	private JTextField yValueTextField;
+
+	// Panel definition
+
+	private JPanel graphPanel;
 
 	public MainFrame() {
 		super("Year project");
@@ -40,34 +53,63 @@ public class MainFrame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
-		
-		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(550, 650));
-		getContentPane().add(panel);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		
-		JPanel graphPanel = createChartPanel();
-		graphPanel.setPreferredSize(new Dimension( 350, 550));
-		panel.add(graphPanel);
-		
+
+		JPanel leftPanel = new JPanel();
+		leftPanel.setPreferredSize(new Dimension(650, 650));
+		getContentPane().add(leftPanel);
+		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+
+		graphPanel = createChartPanel();
+		graphPanel.setPreferredSize(new Dimension(350, 550));
+		leftPanel.add(graphPanel);
+
 		JPanel buttonsPanel = new JPanel();
 		buttonsPanel.setBackground(Color.WHITE);
-		buttonsPanel.setPreferredSize(new Dimension( 350, 100));
-		panel.add(buttonsPanel);
-		
+		buttonsPanel.setPreferredSize(new Dimension(350, 100));
+		leftPanel.add(buttonsPanel);
+
 		JButton drawButton = new JButton("Draw graph");
 		buttonsPanel.add(drawButton);
-		
+
 		JButton removePointsButton = new JButton("Remove points");
+		removePointsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Something happened!");
+				expected.clear();
+			}
+		});
 		buttonsPanel.add(removePointsButton);
-		
+
 		JButton addPointsButton = new JButton("Add point");
 		buttonsPanel.add(addPointsButton);
-		
-		JPanel panel_1 = new JPanel();
-		panel_1.setBackground(Color.WHITE);
-		panel.setPreferredSize(new Dimension( 350, 650));
-		getContentPane().add(panel_1);
+
+		JPanel rightPanel = new JPanel();
+		rightPanel.setBackground(Color.WHITE);
+		rightPanel.setPreferredSize(new Dimension(250, 650));
+		getContentPane().add(rightPanel);
+		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+
+		JPanel labelPanel = new JPanel();
+		labelPanel.setPreferredSize(new Dimension(250, 50));
+		rightPanel.add(labelPanel);
+
+		JLabel xValueLabel = new JLabel("X value");
+		labelPanel.add(xValueLabel);
+
+		JLabel yValueLabel = new JLabel("Y value");
+		labelPanel.add(yValueLabel);
+
+		JPanel inputPointsPanel = new JPanel();
+		inputPointsPanel.setPreferredSize(new Dimension(350, 600));
+		rightPanel.add(inputPointsPanel);
+
+		xValueTextField = new JTextField();
+		inputPointsPanel.add(xValueTextField);
+		xValueTextField.setColumns(10);
+
+		yValueTextField = new JTextField();
+		inputPointsPanel.add(yValueTextField);
+		yValueTextField.setColumns(10);
 	}
 
 	private JPanel createChartPanel() {
@@ -75,7 +117,7 @@ public class MainFrame extends JFrame {
 		String xAxisLabel = "X";
 		String yAxisLabel = "Y";
 
-		XYDataset dataset = createDataset();
+		dataset = createDataset();
 
 		JFreeChart chart = ChartFactory.createXYLineChart(chartTitle, xAxisLabel, yAxisLabel, dataset);
 
@@ -87,7 +129,7 @@ public class MainFrame extends JFrame {
 		XYSeriesCollection dataset = new XYSeriesCollection();
 
 		// Drawing y=sin(x) graph
-		XYSeries expected = new XYSeries("y=3*x");
+		expected = new XYSeries("y=3*x");
 		for (int i = 0; i < 10.0; i++) {
 			double x = i * 0.1;
 			double y = 3 * x;
@@ -101,7 +143,7 @@ public class MainFrame extends JFrame {
 		constants = calculator.calculateConstants();
 
 		// Drawing simulating points
-		XYSeries actual = new XYSeries("Approximation points");
+		actual = new XYSeries("Approximation points");
 
 		for (int i = 0; i < 10; i++) {
 			yActual[i] = calculator.approximate(constants, xExpected[i]);
