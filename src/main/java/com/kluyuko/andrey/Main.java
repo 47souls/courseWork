@@ -2,7 +2,7 @@ package com.kluyuko.andrey;
 
 import javax.swing.SwingUtilities;
 
-import com.kluyuko.andrey.graph.DrawGraph;
+import com.kluyuko.andrey.graph.MainFrame;
 
 public class Main {
 
@@ -11,7 +11,7 @@ public class Main {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				new DrawGraph().setVisible(true);
+				new MainFrame().setVisible(true);
 			}
 		});
 	}

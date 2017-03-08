@@ -18,7 +18,6 @@ public class Calculator {
 	}
 
 	public Calculator(double x[], double y[]) {
-		this.constants = constants;
 		this.x = x;
 		this.y = y;
 	}
@@ -75,6 +74,10 @@ public class Calculator {
 			}
 			System.out.println();
 		}
+		System.out.println("Y= ");
+		for (int i = 0; i < numberOfLines; i++) {
+			System.out.println(y[i]);
+		}
 
 		/* Algorithm go ahead */
 		while (counter < numberOfLines) {
@@ -107,19 +110,21 @@ public class Calculator {
 			x[i] = y[i] - temp;
 		}
 		System.out.println("c[i] : ");
-		for (int i = 0; i < numberOfLines; i++){
+		for (int i = 0; i < numberOfLines; i++) {
 			System.out.println(x[i]);
 		}
 		return x;
 	}
 
 	public double approximate(double c[], double point) {
-		double value = 0;
+		double sum = 0;
+		double fi = 0;
 		for (int i = 0; i < c.length; i++) {
-			System.out.println("fi(i) = " + fi(radius(point, x[i]), e));
-			value += c[i] * fi(radius(point, x[i]), e);
+			fi = fi(radius(point, x[i]), e);
+			System.out.println("fi(i) = " + fi);
+			sum += c[i] * fi;
 		}
-		return value;
+		return sum;
 	}
 
 }
