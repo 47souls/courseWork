@@ -30,6 +30,7 @@ public class MainFrame extends JFrame {
 	private double constants[];
 
 	// points dataSet
+	private ChartPanel chartPanel;
 	private XYDataset dataset;
 	private XYSeries actual;
 	private XYSeries expected;
@@ -69,6 +70,12 @@ public class MainFrame extends JFrame {
 		leftPanel.add(buttonsPanel);
 
 		JButton drawButton = new JButton("Draw graph");
+		drawButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFreeChart chart = generateJFreeChart();
+				chartPanel.setChart(chart);
+			}
+		});
 		buttonsPanel.add(drawButton);
 
 		JButton removePointsButton = new JButton("Remove points");
@@ -113,6 +120,12 @@ public class MainFrame extends JFrame {
 	}
 
 	private JPanel createChartPanel() {
+		JFreeChart chart = generateJFreeChart();
+		chartPanel = new ChartPanel(chart);
+		return chartPanel;
+	}
+
+	private JFreeChart generateJFreeChart() {
 		String chartTitle = "Approximation by radial functions method";
 		String xAxisLabel = "X";
 		String yAxisLabel = "Y";
@@ -120,23 +133,14 @@ public class MainFrame extends JFrame {
 		dataset = createDataset();
 
 		JFreeChart chart = ChartFactory.createXYLineChart(chartTitle, xAxisLabel, yAxisLabel, dataset);
-
-		return new ChartPanel(chart);
+		return chart;
 	}
 
 	private XYDataset createDataset() {
 
 		XYSeriesCollection dataset = new XYSeriesCollection();
 
-		// Drawing y=sin(x) graph
-		expected = new XYSeries("y=3*x");
-		for (int i = 0; i < 10.0; i++) {
-			double x = i * 0.1;
-			double y = 3 * x;
-			expected.add(x, y);
-			xExpected[i] = x;
-			yExpected[i] = y;
-		}
+		generateExpectedDataset();
 
 		// Calculating constants
 		calculator = new Calculator(xExpected, yExpected);
@@ -155,5 +159,19 @@ public class MainFrame extends JFrame {
 		// dataset.addSeries(actual);
 
 		return dataset;
+	}
+
+	private void generateExpectedDataset() {
+
+		// Drawing y=sin(x) graph
+
+		expected = new XYSeries("y = 3*x");
+		for (int i = 0; i < 10.0; i++) {
+			double x = i * 0.1;
+			double y = 3 * x;
+			expected.add(x, y);
+			xExpected[i] = x;
+			yExpected[i] = y;
+		}
 	}
 }
