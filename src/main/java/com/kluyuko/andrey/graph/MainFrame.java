@@ -171,18 +171,20 @@ public class MainFrame extends JFrame {
 
 		generateExpectedDataset();
 
+
 		// Calculating constants
+		/* TODO after this 2 lines xExpected is transforming into constants
+		*	that's why calculator.calculateConstants()
+		*
+		*/
 		calculator = new Calculator(xExpected, yExpected);
 		constants = calculator.calculateConstants();
 
 		// Drawing simulating points
 		actual = new XYSeries("Approximation points");
 
-		for (int i = 0; i < 4; i++) {
-			yActual.add(i, calculator.approximate(constants, xExpected.get(i)));
-			System.out.println(yActual.get(i));
-			actual.add(xExpected.get(i), yActual.get(i));
-		}
+		double approximatedPoint = 0.05;
+		System.out.println("Approximated point : " + approximatedPoint + " and value: " + calculator.approximate(constants, xExpected, approximatedPoint));
 
 		dataset.addSeries(expected);
 		dataset.addSeries(actual);
@@ -191,6 +193,8 @@ public class MainFrame extends JFrame {
 	}
 
 	private void generateExpectedDataset() {
+		
+		// TODO it should be generated dynamically depending on user input!
 		expected = new XYSeries("y = 3*x");
 		for (int i = 0; i < 4; i++) {
 			double x = i * 0.1;
@@ -198,12 +202,6 @@ public class MainFrame extends JFrame {
 			expected.add(x, y);
 			xExpected.add(i, x);
 			yExpected.add(i, y);
-		}
-		for (Double point: xExpected) {
-			System.out.println("xExpected: " + point);
-		}
-		for (Double point: yExpected) {
-			System.out.println("yExpected: " + point);
 		}
 	}
 }

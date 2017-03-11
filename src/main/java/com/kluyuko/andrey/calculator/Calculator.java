@@ -1,5 +1,6 @@
 package com.kluyuko.andrey.calculator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -65,13 +66,19 @@ public class Calculator {
 
 		int counter = 0;
 		int numberOfLines = x.size();
-		double arr[][] = new double[numberOfLines][numberOfLines];
-
-		/* Calculating arr[][] using radial function */
+		double fi[][] = new double[numberOfLines][numberOfLines];
+		List<Double> oldX = new ArrayList<>();
+		
+		
+		for (int i = 0; i < x.size(); i++) {
+			oldX.add(i, x.get(i));
+		}
+		
+		/* Calculating fi[][] using radial function */
 		for (int i = 0; i < numberOfLines; i++) {
 			for (int j = 0; j < numberOfLines; j++) {
-				arr[i][j] = fi(radius(x.get(i), x.get(j)), E);
-				System.out.print(arr[i][j] + " ");
+				fi[i][j] = fi(radius(oldX.get(i), oldX.get(j)), E);
+				System.out.print(fi[i][j] + " ");
 			}
 			System.out.println();
 		}
@@ -82,48 +89,51 @@ public class Calculator {
 
 		/* Algorithm go ahead */
 		while (counter < numberOfLines) {
-			double temp = arr[counter][counter];
+			double temp = fi[counter][counter];
 			double temp3 = y.get(counter);
 			for (int i = counter; i < numberOfLines - 1; i++) {
-				double temp2 = arr[i + 1][counter];
+				double temp2 = fi[i + 1][counter];
 				for (int j = counter; j < numberOfLines - 1; j++) {
-					arr[i + 1][j + 1] = arr[i + 1][j + 1] - arr[counter][j + 1] * temp2 / temp;
+					fi[i + 1][j + 1] = fi[i + 1][j + 1] - fi[counter][j + 1] * temp2 / temp;
 				}
 				y.set(i + 1, y.get(i + 1) - temp3 * temp2 / temp);
 			}
 			y.set(counter, y.get(counter) / temp);
 			for (int i = counter; i < numberOfLines; i++) {
-				arr[counter][i] = arr[counter][i] / temp;
+				fi[counter][i] = fi[counter][i] / temp;
 			}
 			for (int i = counter + 1; i < numberOfLines; i++) {
-				arr[i][counter] = 0;
+				fi[i][counter] = 0;
 			}
 			counter++;
 		}
 
 		/* Algorithm go behind */
-		x.set(numberOfLines - 1, y.get(numberOfLines - 1));
+		oldX.set(numberOfLines - 1, y.get(numberOfLines - 1));
 		for (int i = numberOfLines - 2; i >= 0; i--) {
 			double temp = 0;
 			for (int j = i + 1; j < numberOfLines; j++) {
-				temp += arr[i][j] * x.get(j);
+				temp += fi[i][j] * oldX.get(j);
 			}
-			x.set(i, y.get(i) - temp);
+			oldX.set(i, y.get(i) - temp);
 		}
 		System.out.println("c[i] : ");
 		for (int i = 0; i < numberOfLines; i++) {
-			System.out.println(x.get(i));
+			System.out.println(oldX.get(i));
 		}
-		return x;
+		return oldX;
 	}
 
-	public double approximate(List<Double> c, double point) {
+	public double approximate(List<Double> constants, List<Double> x, double point) {
 		double sum = 0;
 		double fi = 0;
-		for (int i = 0; i < c.size(); i++) {
-			fi = fi(radius(point, x.get(i)), E);
+		for (int i = 0; i < constants.size(); i++) {
+			System.out.println("constants.get(i)" + constants.get(i));
+			System.out.println("X.get(i): " + x.get(i));
+			double radius = radius(point, x.get(i));
+			fi = fi(radius, E);
 			System.out.println("fi(i) = " + fi);
-			sum += c.get(i) * fi;
+			sum += constants.get(i) * fi;
 		}
 		return sum;
 	}
