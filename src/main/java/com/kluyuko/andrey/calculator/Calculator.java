@@ -10,14 +10,15 @@ import java.util.List;
 public class Calculator {
 
 	private List<Double> constants;
-	private double x[];
-	private double y[];
-	public static double e = 1;
+	private List<Double> x;
+	private List<Double> y;
+	public final static double E = 1;
 
-	public Calculator() {
+	@SuppressWarnings("unused")
+	private Calculator() {
 	}
 
-	public Calculator(double x[], double y[]) {
+	public Calculator(List<Double> x, List<Double> y) {
 		this.x = x;
 		this.y = y;
 	}
@@ -30,19 +31,19 @@ public class Calculator {
 		this.constants = constants;
 	}
 
-	public double[] getX() {
+	public List<Double> getX() {
 		return x;
 	}
 
-	public void setX(double x[]) {
+	public void setX(List<Double> x) {
 		this.x = x;
 	}
 
-	public double[] getY() {
+	public List<Double> getY() {
 		return y;
 	}
 
-	public void setY(double y[]) {
+	public void setY(List<Double> y) {
 		this.y = y;
 	}
 
@@ -60,37 +61,37 @@ public class Calculator {
 
 	// calculation specific methods
 
-	public double[] calculateConstants() {
+	public List<Double> calculateConstants() {
 
 		int counter = 0;
-		int numberOfLines = x.length;
+		int numberOfLines = x.size();
 		double arr[][] = new double[numberOfLines][numberOfLines];
 
 		/* Calculating arr[][] using radial function */
 		for (int i = 0; i < numberOfLines; i++) {
 			for (int j = 0; j < numberOfLines; j++) {
-				arr[i][j] = fi(radius(x[i], x[j]), e);
+				arr[i][j] = fi(radius(x.get(i), x.get(j)), E);
 				System.out.print(arr[i][j] + " ");
 			}
 			System.out.println();
 		}
 		System.out.println("Y= ");
 		for (int i = 0; i < numberOfLines; i++) {
-			System.out.println(y[i]);
+			System.out.println(y.get(i));
 		}
 
 		/* Algorithm go ahead */
 		while (counter < numberOfLines) {
 			double temp = arr[counter][counter];
-			double temp3 = y[counter];
+			double temp3 = y.get(counter);
 			for (int i = counter; i < numberOfLines - 1; i++) {
 				double temp2 = arr[i + 1][counter];
 				for (int j = counter; j < numberOfLines - 1; j++) {
 					arr[i + 1][j + 1] = arr[i + 1][j + 1] - arr[counter][j + 1] * temp2 / temp;
 				}
-				y[i + 1] = y[i + 1] - temp3 * temp2 / temp;
+				y.set(i + 1, y.get(i + 1) - temp3 * temp2 / temp);
 			}
-			y[counter] = y[counter] / temp;
+			y.set(counter, y.get(counter) / temp);
 			for (int i = counter; i < numberOfLines; i++) {
 				arr[counter][i] = arr[counter][i] / temp;
 			}
@@ -101,28 +102,28 @@ public class Calculator {
 		}
 
 		/* Algorithm go behind */
-		x[numberOfLines - 1] = y[numberOfLines - 1];
+		x.set(numberOfLines - 1, y.get(numberOfLines - 1));
 		for (int i = numberOfLines - 2; i >= 0; i--) {
 			double temp = 0;
 			for (int j = i + 1; j < numberOfLines; j++) {
-				temp += arr[i][j] * x[j];
+				temp += arr[i][j] * x.get(j);
 			}
-			x[i] = y[i] - temp;
+			x.set(i, y.get(i) - temp);
 		}
 		System.out.println("c[i] : ");
 		for (int i = 0; i < numberOfLines; i++) {
-			System.out.println(x[i]);
+			System.out.println(x.get(i));
 		}
 		return x;
 	}
 
-	public double approximate(double c[], double point) {
+	public double approximate(List<Double> c, double point) {
 		double sum = 0;
 		double fi = 0;
-		for (int i = 0; i < c.length; i++) {
-			fi = fi(radius(point, x[i]), e);
+		for (int i = 0; i < c.size(); i++) {
+			fi = fi(radius(point, x.get(i)), E);
 			System.out.println("fi(i) = " + fi);
-			sum += c[i] * fi;
+			sum += c.get(i) * fi;
 		}
 		return sum;
 	}

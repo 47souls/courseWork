@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -24,10 +26,10 @@ import com.kluyuko.andrey.calculator.Calculator;
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
 
-	private double xExpected[];
-	private double yExpected[];
-	private double yActual[];
-	private double constants[];
+	private List<Double> xExpected;
+	private List<Double> yExpected;
+	private List<Double> yActual;
+	private List<Double> constants;
 
 	// points dataSet
 	private ChartPanel chartPanel;
@@ -36,26 +38,34 @@ public class MainFrame extends JFrame {
 	private XYSeries expected;
 
 	private Calculator calculator;
+
+	private JPanel leftPanel;
+	private JPanel rightPanel;
+	private JPanel graphPanel;
+	private JPanel buttonsPanel;
+	private JPanel labelPanel;
+	private JPanel xyValuePanel;
+	private JPanel inputPointsPanel;
+
+	private JLabel xValueLabel;
+	private JLabel yValueLabel;
+	
 	private JTextField xValueTextField;
 	private JTextField yValueTextField;
 
-	// Panel definition
-
-	private JPanel graphPanel;
-
 	public MainFrame() {
 		super("Year project");
-		xExpected = new double[10];
-		yExpected = new double[10];
-		yActual = new double[10];
-		constants = new double[10];
+		xExpected = new ArrayList<>();
+		yExpected = new ArrayList<>();
+		yActual = new ArrayList<>();
+		constants = new ArrayList<>();
 
 		setSize(900, 650);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
 
-		JPanel leftPanel = new JPanel();
+		leftPanel = new JPanel();
 		leftPanel.setPreferredSize(new Dimension(650, 650));
 		getContentPane().add(leftPanel);
 		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
@@ -64,7 +74,7 @@ public class MainFrame extends JFrame {
 		graphPanel.setPreferredSize(new Dimension(350, 550));
 		leftPanel.add(graphPanel);
 
-		JPanel buttonsPanel = new JPanel();
+		buttonsPanel = new JPanel();
 		buttonsPanel.setBackground(Color.WHITE);
 		buttonsPanel.setPreferredSize(new Dimension(350, 100));
 		leftPanel.add(buttonsPanel);
@@ -81,33 +91,48 @@ public class MainFrame extends JFrame {
 		JButton removePointsButton = new JButton("Remove points");
 		removePointsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Something happened!");
 				expected.clear();
 			}
 		});
 		buttonsPanel.add(removePointsButton);
 
 		JButton addPointsButton = new JButton("Add point");
+		addPointsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO read value of inputed x and y and set it in arrayLists
+				xyValuePanel.add(new JLabel("Bla"));
+				xyValuePanel.validate();
+				xyValuePanel.repaint();
+			}
+		});
 		buttonsPanel.add(addPointsButton);
+		
+		JButton clearPointArrayButton = new JButton("Clear point array");
+		clearPointArrayButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO remove points from memory and clear interface
+			}
+		});
+		buttonsPanel.add(clearPointArrayButton);
 
-		JPanel rightPanel = new JPanel();
+		rightPanel = new JPanel();
 		rightPanel.setBackground(Color.WHITE);
 		rightPanel.setPreferredSize(new Dimension(250, 650));
 		getContentPane().add(rightPanel);
 		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
 
-		JPanel labelPanel = new JPanel();
+		labelPanel = new JPanel();
 		labelPanel.setPreferredSize(new Dimension(250, 50));
 		rightPanel.add(labelPanel);
 
-		JLabel xValueLabel = new JLabel("X value");
+		xValueLabel = new JLabel("X value");
 		labelPanel.add(xValueLabel);
 
-		JLabel yValueLabel = new JLabel("Y value");
+		yValueLabel = new JLabel("Y value");
 		labelPanel.add(yValueLabel);
 
-		JPanel inputPointsPanel = new JPanel();
-		inputPointsPanel.setPreferredSize(new Dimension(350, 600));
+		inputPointsPanel = new JPanel();
+		inputPointsPanel.setPreferredSize(new Dimension(350, 50));
 		rightPanel.add(inputPointsPanel);
 
 		xValueTextField = new JTextField();
@@ -117,6 +142,10 @@ public class MainFrame extends JFrame {
 		yValueTextField = new JTextField();
 		inputPointsPanel.add(yValueTextField);
 		yValueTextField.setColumns(10);
+
+		xyValuePanel = new JPanel();
+		xyValuePanel.setPreferredSize(new Dimension(350, 600));
+		rightPanel.add(xyValuePanel);
 	}
 
 	private JPanel createChartPanel() {
@@ -149,29 +178,32 @@ public class MainFrame extends JFrame {
 		// Drawing simulating points
 		actual = new XYSeries("Approximation points");
 
-		for (int i = 0; i < 10; i++) {
-			yActual[i] = calculator.approximate(constants, xExpected[i]);
-			System.out.println(yActual[i]);
-			actual.add(xExpected[i], yActual[i]);
+		for (int i = 0; i < 4; i++) {
+			yActual.add(i, calculator.approximate(constants, xExpected.get(i)));
+			System.out.println(yActual.get(i));
+			actual.add(xExpected.get(i), yActual.get(i));
 		}
 
 		dataset.addSeries(expected);
-		// dataset.addSeries(actual);
+		dataset.addSeries(actual);
 
 		return dataset;
 	}
 
 	private void generateExpectedDataset() {
-
-		// Drawing y=sin(x) graph
-
 		expected = new XYSeries("y = 3*x");
-		for (int i = 0; i < 10.0; i++) {
+		for (int i = 0; i < 4; i++) {
 			double x = i * 0.1;
 			double y = 3 * x;
 			expected.add(x, y);
-			xExpected[i] = x;
-			yExpected[i] = y;
+			xExpected.add(i, x);
+			yExpected.add(i, y);
+		}
+		for (Double point: xExpected) {
+			System.out.println("xExpected: " + point);
+		}
+		for (Double point: yExpected) {
+			System.out.println("yExpected: " + point);
 		}
 	}
 }
