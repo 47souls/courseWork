@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,10 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import com.kluyuko.andrey.calculator.Calculator;
+import com.kluyuko.andrey.listener.InputFieldListener;
+import com.kluyuko.andrey.listener.InputFieldsFocusListener;
+import com.kluyuko.andrey.listener.PointsKeyListener;
+import com.kluyuko.andrey.utils.Utils;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -30,6 +36,11 @@ public class MainFrame extends JFrame {
 	private List<Double> yExpected;
 	private List<Double> yActual;
 	private List<Double> constants;
+
+	// additional classes
+
+	private PointsKeyListener pointsKeyListener;
+	private InputFieldListener listener;
 
 	// points dataSet
 	private ChartPanel chartPanel;
@@ -49,7 +60,7 @@ public class MainFrame extends JFrame {
 
 	private JLabel xValueLabel;
 	private JLabel yValueLabel;
-	
+
 	private JTextField xValueTextField;
 	private JTextField yValueTextField;
 
@@ -99,18 +110,37 @@ public class MainFrame extends JFrame {
 		JButton addPointsButton = new JButton("Add point");
 		addPointsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO read value of inputed x and y and set it in arrayLists
-				xyValuePanel.add(new JLabel("Bla"));
+				/*
+				 * TODO 1) Read value of inputed x and y and set it in
+				 * arrayLists (Done) 2) Validate if value is not a character but
+				 * double number 3) Check if it has been already added. 4) Think
+				 * about x0=,y0=; x1=,y1=; and so on
+				 */
+				double x = Double.parseDouble(xValueTextField.getText());
+				double y = Double.parseDouble(yValueTextField.getText());
+				xExpected.add(x);
+				yExpected.add(y);
+				Utils.addLabelsToPanel(xyValuePanel, x, y);
 				xyValuePanel.validate();
 				xyValuePanel.repaint();
+				xValueTextField.setText("");
+				xValueTextField.setBackground(Color.WHITE);
+				yValueTextField.setText("");
+				yValueTextField.setBackground(Color.WHITE);
 			}
 		});
 		buttonsPanel.add(addPointsButton);
-		
+
 		JButton clearPointArrayButton = new JButton("Clear point array");
 		clearPointArrayButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO remove points from memory and clear interface
+				/*
+				 * TODO 1) Think about refactoring of this shit
+				 */
+				xExpected.clear();
+				yExpected.clear();
+				xyValuePanel.removeAll();
+				xyValuePanel.repaint();
 			}
 		});
 		buttonsPanel.add(clearPointArrayButton);
@@ -143,9 +173,15 @@ public class MainFrame extends JFrame {
 		inputPointsPanel.add(yValueTextField);
 		yValueTextField.setColumns(10);
 
+		xValueTextField.addKeyListener(new PointsKeyListener());
+		yValueTextField.addKeyListener(new PointsKeyListener());
+		xValueTextField.addFocusListener(new InputFieldsFocusListener());
+		yValueTextField.addFocusListener(new InputFieldsFocusListener());
+
 		xyValuePanel = new JPanel();
 		xyValuePanel.setPreferredSize(new Dimension(350, 600));
 		rightPanel.add(xyValuePanel);
+
 	}
 
 	private JPanel createChartPanel() {
@@ -171,12 +207,6 @@ public class MainFrame extends JFrame {
 
 		generateExpectedDataset();
 
-
-		// Calculating constants
-		/* TODO after this 2 lines xExpected is transforming into constants
-		*	that's why calculator.calculateConstants()
-		*
-		*/
 		calculator = new Calculator(xExpected, yExpected);
 		constants = calculator.calculateConstants();
 
@@ -184,7 +214,8 @@ public class MainFrame extends JFrame {
 		actual = new XYSeries("Approximation points");
 
 		double approximatedPoint = 0.05;
-		System.out.println("Approximated point : " + approximatedPoint + " and value: " + calculator.approximate(constants, xExpected, approximatedPoint));
+		System.out.println("Approximated point : " + approximatedPoint + " and value: "
+				+ calculator.approximate(constants, xExpected, approximatedPoint));
 
 		dataset.addSeries(expected);
 		dataset.addSeries(actual);
@@ -193,7 +224,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private void generateExpectedDataset() {
-		
+
 		// TODO it should be generated dynamically depending on user input!
 		expected = new XYSeries("y = 3*x");
 		for (int i = 0; i < 4; i++) {
