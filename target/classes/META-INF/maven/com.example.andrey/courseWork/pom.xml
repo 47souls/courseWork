@@ -15,6 +15,5 @@
 			<artifactId>jcommon</artifactId>
 			<version>1.0.23</version>
 		</dependency>
-
 	</dependencies>
 </project>

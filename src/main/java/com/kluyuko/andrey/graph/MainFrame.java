@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +11,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -24,10 +23,10 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import com.kluyuko.andrey.calculator.Calculator;
-import com.kluyuko.andrey.listener.InputFieldListener;
 import com.kluyuko.andrey.listener.InputFieldsFocusListener;
 import com.kluyuko.andrey.listener.PointsKeyListener;
-import com.kluyuko.andrey.utils.Utils;
+import com.kluyuko.andrey.utils.GUIUtils;
+import com.kluyuko.andrey.utils.GraphUtils;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -36,20 +35,21 @@ public class MainFrame extends JFrame {
 	private List<Double> yExpected;
 	private List<Double> yActual;
 	private List<Double> constants;
-
-	// additional classes
-
-	private PointsKeyListener pointsKeyListener;
-	private InputFieldListener listener;
+	private boolean isInputtingExpectedNumbers;
+	private String chartTitle = "Approximation by radial functions method";
+	private String xAxisLabel = "X";
+	private String yAxisLabel = "Y";
 
 	// points dataSet
 	private ChartPanel chartPanel;
-	private XYDataset dataset;
+
+	private XYSeriesCollection dataset;
 	private XYSeries actual;
 	private XYSeries expected;
 
 	private Calculator calculator;
 
+	private JFrame self = this;
 	private JPanel leftPanel;
 	private JPanel rightPanel;
 	private JPanel graphPanel;
@@ -81,7 +81,11 @@ public class MainFrame extends JFrame {
 		getContentPane().add(leftPanel);
 		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
 
-		graphPanel = createChartPanel();
+		// Creation of graphical part
+
+		dataset = new XYSeriesCollection();
+		JFreeChart chart = ChartFactory.createXYLineChart(chartTitle, xAxisLabel, yAxisLabel, dataset);
+		graphPanel = new ChartPanel(chart);
 		graphPanel.setPreferredSize(new Dimension(350, 550));
 		leftPanel.add(graphPanel);
 
@@ -93,8 +97,10 @@ public class MainFrame extends JFrame {
 		JButton drawButton = new JButton("Draw graph");
 		drawButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JFreeChart chart = generateJFreeChart();
-				chartPanel.setChart(chart);
+				expected = GraphUtils.createXYSeries("Some undefined graph", xExpected, yExpected);
+				dataset.addSeries(expected);
+				JFreeChart newChart = ChartFactory.createXYLineChart(chartTitle, xAxisLabel, yAxisLabel, dataset);
+				chartPanel.setChart(newChart);
 			}
 		});
 		buttonsPanel.add(drawButton);
@@ -102,6 +108,7 @@ public class MainFrame extends JFrame {
 		JButton removePointsButton = new JButton("Remove points");
 		removePointsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				dataset.removeAllSeries();
 				expected.clear();
 			}
 		});
@@ -110,24 +117,47 @@ public class MainFrame extends JFrame {
 		JButton addPointsButton = new JButton("Add point");
 		addPointsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				/*
-				 * TODO 1) Read value of inputed x and y and set it in
-				 * arrayLists (Done) 2) Validate if value is not a character but
-				 * double number 3) Check if it has been already added. 4) Think
-				 * about x0=,y0=; x1=,y1=; and so on
-				 */
-				double x = Double.parseDouble(xValueTextField.getText());
-				double y = Double.parseDouble(yValueTextField.getText());
-				xExpected.add(x);
-				yExpected.add(y);
-				Utils.addLabelsToPanel(xyValuePanel, x, y);
+				double x = 0;
+				double y = 0;
+				boolean isInputFielsValid = false;
+
+				x = GUIUtils.validateThatIsDouble(xValueTextField);
+				y = GUIUtils.validateThatIsDouble(yValueTextField);
+
+				// TODO maybe it should be refactored?????
+
+				if (!Double.isNaN(x)) {
+					if (!xExpected.contains(x)) {
+						xExpected.add(x);
+						GUIUtils.clearInputField(xValueTextField);
+					} else {
+						GUIUtils.showAlreadyAddedErrorDialog(self, "x", x);
+					}
+				} else {
+					GUIUtils.showIncorrectInputErrorDialog(self, "x", xValueTextField.getText());
+				}
+
+				if (!Double.isNaN(y)) {
+					if (!yExpected.contains(y)) {
+						yExpected.add(y);
+						GUIUtils.clearInputField(yValueTextField);
+						isInputFielsValid = true;
+					} else {
+						GUIUtils.showAlreadyAddedErrorDialog(self, "y", y);
+					}
+				} else {
+					GUIUtils.showIncorrectInputErrorDialog(self, "y", yValueTextField.getText());
+				}
+
+				if (isInputFielsValid) {
+					GUIUtils.addLabelToPanel(xyValuePanel, x);
+					GUIUtils.addLabelToPanel(xyValuePanel, y);
+				}
+
 				xyValuePanel.validate();
 				xyValuePanel.repaint();
-				xValueTextField.setText("");
-				xValueTextField.setBackground(Color.WHITE);
-				yValueTextField.setText("");
-				yValueTextField.setBackground(Color.WHITE);
 			}
+
 		});
 		buttonsPanel.add(addPointsButton);
 
@@ -173,8 +203,6 @@ public class MainFrame extends JFrame {
 		inputPointsPanel.add(yValueTextField);
 		yValueTextField.setColumns(10);
 
-		xValueTextField.addKeyListener(new PointsKeyListener());
-		yValueTextField.addKeyListener(new PointsKeyListener());
 		xValueTextField.addFocusListener(new InputFieldsFocusListener());
 		yValueTextField.addFocusListener(new InputFieldsFocusListener());
 
@@ -182,23 +210,6 @@ public class MainFrame extends JFrame {
 		xyValuePanel.setPreferredSize(new Dimension(350, 600));
 		rightPanel.add(xyValuePanel);
 
-	}
-
-	private JPanel createChartPanel() {
-		JFreeChart chart = generateJFreeChart();
-		chartPanel = new ChartPanel(chart);
-		return chartPanel;
-	}
-
-	private JFreeChart generateJFreeChart() {
-		String chartTitle = "Approximation by radial functions method";
-		String xAxisLabel = "X";
-		String yAxisLabel = "Y";
-
-		dataset = createDataset();
-
-		JFreeChart chart = ChartFactory.createXYLineChart(chartTitle, xAxisLabel, yAxisLabel, dataset);
-		return chart;
 	}
 
 	private XYDataset createDataset() {
@@ -235,4 +246,5 @@ public class MainFrame extends JFrame {
 			yExpected.add(i, y);
 		}
 	}
+
 }

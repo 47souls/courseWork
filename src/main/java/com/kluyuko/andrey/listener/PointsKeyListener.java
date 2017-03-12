@@ -1,12 +1,8 @@
 package com.kluyuko.andrey.listener;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 
 public class PointsKeyListener extends KeyAdapter {
 
