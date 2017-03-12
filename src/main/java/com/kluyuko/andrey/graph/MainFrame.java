@@ -11,20 +11,17 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import com.kluyuko.andrey.calculator.Calculator;
 import com.kluyuko.andrey.listener.InputFieldsFocusListener;
-import com.kluyuko.andrey.listener.PointsKeyListener;
 import com.kluyuko.andrey.utils.GUIUtils;
 import com.kluyuko.andrey.utils.GraphUtils;
 
@@ -210,41 +207,6 @@ public class MainFrame extends JFrame {
 		xyValuePanel.setPreferredSize(new Dimension(350, 600));
 		rightPanel.add(xyValuePanel);
 
-	}
-
-	private XYDataset createDataset() {
-
-		XYSeriesCollection dataset = new XYSeriesCollection();
-
-		generateExpectedDataset();
-
-		calculator = new Calculator(xExpected, yExpected);
-		constants = calculator.calculateConstants();
-
-		// Drawing simulating points
-		actual = new XYSeries("Approximation points");
-
-		double approximatedPoint = 0.05;
-		System.out.println("Approximated point : " + approximatedPoint + " and value: "
-				+ calculator.approximate(constants, xExpected, approximatedPoint));
-
-		dataset.addSeries(expected);
-		dataset.addSeries(actual);
-
-		return dataset;
-	}
-
-	private void generateExpectedDataset() {
-
-		// TODO it should be generated dynamically depending on user input!
-		expected = new XYSeries("y = 3*x");
-		for (int i = 0; i < 4; i++) {
-			double x = i * 0.1;
-			double y = 3 * x;
-			expected.add(x, y);
-			xExpected.add(i, x);
-			yExpected.add(i, y);
-		}
 	}
 
 }

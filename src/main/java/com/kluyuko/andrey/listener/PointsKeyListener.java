@@ -1,12 +1,10 @@
 package com.kluyuko.andrey.listener;
 
-import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class PointsKeyListener extends KeyAdapter {
 
-	private final Color FAILURE_COLOUR = Color.RED;
 	private double xValue;
 	private double yValue;
 
