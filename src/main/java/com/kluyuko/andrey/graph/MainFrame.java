@@ -21,19 +21,24 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import com.kluyuko.andrey.calculator.Calculator;
+import com.kluyuko.andrey.listener.ApproximatePointsItemListener;
 import com.kluyuko.andrey.listener.InputFieldsFocusListener;
 import com.kluyuko.andrey.utils.GUIUtils;
 import com.kluyuko.andrey.utils.GraphUtils;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
 
 	private List<Double> xExpected;
 	private List<Double> yExpected;
+	private List<Double> xActual;
 	private List<Double> yActual;
 	private List<Double> constants;
 	private boolean isInputtingExpectedNumbers;
-	private String chartTitle = "Approximation by radial functions method";
+	private String chartTitle = "Апроксимація методом радіально-базисних функцій";
 	private String xAxisLabel = "X";
 	private String yAxisLabel = "Y";
 
@@ -41,8 +46,8 @@ public class MainFrame extends JFrame {
 	private ChartPanel chartPanel;
 
 	private XYSeriesCollection dataset;
-	private XYSeries actual;
 	private XYSeries expected;
+	private XYSeries actual;
 
 	private Calculator calculator;
 
@@ -60,11 +65,24 @@ public class MainFrame extends JFrame {
 
 	private JTextField xValueTextField;
 	private JTextField yValueTextField;
+	private JPanel additionalInfoPanel;
+	private JPanel functInfoPanel;
+	private JPanel oversightInfoPanel;
+	private JPanel typeOfFunctPanel;
+	private JPanel typeOfParamPanel;
+	private JPanel textFunctPanel;
+	private JPanel chooseFunctPanel;
+	private JLabel lblNewLabel;
+	private JComboBox comboBox;
+	private JLabel lblNewLabel_1;
+	private JComboBox comboBox_1;
+	private JCheckBox approximationCheckBox;
 
 	public MainFrame() {
-		super("Year project");
+		super("Дипломна робота");
 		xExpected = new ArrayList<>();
 		yExpected = new ArrayList<>();
+		xActual = new ArrayList<>();
 		yActual = new ArrayList<>();
 		constants = new ArrayList<>();
 
@@ -82,36 +100,54 @@ public class MainFrame extends JFrame {
 
 		dataset = new XYSeriesCollection();
 		JFreeChart chart = ChartFactory.createXYLineChart(chartTitle, xAxisLabel, yAxisLabel, dataset);
-		graphPanel = new ChartPanel(chart);
-		graphPanel.setPreferredSize(new Dimension(350, 550));
-		leftPanel.add(graphPanel);
+		chartPanel = new ChartPanel(chart);
+		chartPanel.setPreferredSize(new Dimension(350, 550));
+		leftPanel.add(chartPanel);
 
 		buttonsPanel = new JPanel();
 		buttonsPanel.setBackground(Color.WHITE);
 		buttonsPanel.setPreferredSize(new Dimension(350, 100));
 		leftPanel.add(buttonsPanel);
 
-		JButton drawButton = new JButton("Draw graph");
+		JButton drawButton = new JButton("Намалювати графік");
 		drawButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				expected = GraphUtils.createXYSeries("Some undefined graph", xExpected, yExpected);
-				dataset.addSeries(expected);
-				JFreeChart newChart = ChartFactory.createXYLineChart(chartTitle, xAxisLabel, yAxisLabel, dataset);
-				chartPanel.setChart(newChart);
+				if (!approximationCheckBox.isSelected()) {
+					// Just painting graph from user`s x and y input
+					if (dataset.getSeries().contains(expected)) {
+						// Releasing dataset
+						dataset.removeSeries(expected);
+					} else {
+						// Drawing graph
+						expected = GraphUtils.createXYSeries("Невизначений графік", xExpected, yExpected);
+						dataset.addSeries(expected);
+					}
+				} else {
+					// Approximation and painting actual point from x input
+					// logic
+					if (dataset.getSeries().contains(actual)) {
+						dataset.removeSeries(actual);
+					} else {
+						Calculator calculator = new Calculator(xExpected, yExpected);
+						constants = calculator.calculateConstants();
+
+						double x = GUIUtils.validateThatIsDouble(xValueTextField);
+						double y = calculator.approximate(constants, xExpected, x);
+						System.out.println("y = " + y);
+
+						xActual.add(x);
+						yActual.add(y);
+
+						actual = GraphUtils.createXYSeries("Aпроксимований графік", xActual, yActual);
+						dataset.addSeries(actual);
+					}
+
+				}
 			}
 		});
 		buttonsPanel.add(drawButton);
 
-		JButton removePointsButton = new JButton("Remove points");
-		removePointsButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				dataset.removeAllSeries();
-				expected.clear();
-			}
-		});
-		buttonsPanel.add(removePointsButton);
-
-		JButton addPointsButton = new JButton("Add point");
+		JButton addPointsButton = new JButton("Додати точку");
 		addPointsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				double x = 0;
@@ -158,7 +194,7 @@ public class MainFrame extends JFrame {
 		});
 		buttonsPanel.add(addPointsButton);
 
-		JButton clearPointArrayButton = new JButton("Clear point array");
+		JButton clearPointArrayButton = new JButton("Очистити масив точок");
 		clearPointArrayButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				/*
@@ -182,14 +218,14 @@ public class MainFrame extends JFrame {
 		labelPanel.setPreferredSize(new Dimension(250, 50));
 		rightPanel.add(labelPanel);
 
-		xValueLabel = new JLabel("X value");
+		xValueLabel = new JLabel("Значення X");
 		labelPanel.add(xValueLabel);
 
-		yValueLabel = new JLabel("Y value");
+		yValueLabel = new JLabel("Значення Y");
 		labelPanel.add(yValueLabel);
 
 		inputPointsPanel = new JPanel();
-		inputPointsPanel.setPreferredSize(new Dimension(350, 50));
+		inputPointsPanel.setPreferredSize(new Dimension(350, 75));
 		rightPanel.add(inputPointsPanel);
 
 		xValueTextField = new JTextField();
@@ -200,12 +236,60 @@ public class MainFrame extends JFrame {
 		inputPointsPanel.add(yValueTextField);
 		yValueTextField.setColumns(10);
 
+		approximationCheckBox = new JCheckBox("Режим апроксимації");
+		approximationCheckBox.addItemListener(new ApproximatePointsItemListener(yValueTextField));
+		inputPointsPanel.add(approximationCheckBox);
+
 		xValueTextField.addFocusListener(new InputFieldsFocusListener());
 		yValueTextField.addFocusListener(new InputFieldsFocusListener());
 
 		xyValuePanel = new JPanel();
-		xyValuePanel.setPreferredSize(new Dimension(350, 600));
+		xyValuePanel.setPreferredSize(new Dimension(350, 225));
 		rightPanel.add(xyValuePanel);
+
+		additionalInfoPanel = new JPanel();
+		additionalInfoPanel.setPreferredSize(new Dimension(350, 350));
+		additionalInfoPanel.setLayout(new BoxLayout(additionalInfoPanel, BoxLayout.Y_AXIS));
+		rightPanel.add(additionalInfoPanel);
+
+		functInfoPanel = new JPanel();
+		functInfoPanel.setLayout(new BoxLayout(functInfoPanel, BoxLayout.Y_AXIS));
+		functInfoPanel.setPreferredSize(new Dimension(350, 175));
+		additionalInfoPanel.add(functInfoPanel);
+
+		typeOfFunctPanel = new JPanel();
+		typeOfFunctPanel.setLayout(new BoxLayout(typeOfFunctPanel, BoxLayout.Y_AXIS));
+		typeOfFunctPanel.setPreferredSize(new Dimension(350, 100));
+		functInfoPanel.add(typeOfFunctPanel);
+
+		textFunctPanel = new JPanel();
+		typeOfFunctPanel.add(textFunctPanel);
+
+		lblNewLabel = new JLabel("Тип апроксимаційної функції");
+		textFunctPanel.add(lblNewLabel);
+
+		chooseFunctPanel = new JPanel();
+		typeOfFunctPanel.add(chooseFunctPanel);
+
+		comboBox = new JComboBox();
+		comboBox.setModel(new DefaultComboBoxModel(new String[] { "Мультиквадратична РБФ (МкРБФ)", "Обернена МкРБФ",
+				"Обернена квадратична РБФ", "Гаусівська РБФ" }));
+		chooseFunctPanel.add(comboBox);
+
+		typeOfParamPanel = new JPanel();
+		typeOfParamPanel.setPreferredSize(new Dimension(350, 75));
+		functInfoPanel.add(typeOfParamPanel);
+
+		lblNewLabel_1 = new JLabel("Параметр форми: E =");
+		typeOfParamPanel.add(lblNewLabel_1);
+
+		comboBox_1 = new JComboBox();
+		comboBox_1.setModel(new DefaultComboBoxModel(new String[] { "0.5", "1.0", "5.0" }));
+		typeOfParamPanel.add(comboBox_1);
+
+		oversightInfoPanel = new JPanel();
+		oversightInfoPanel.setPreferredSize(new Dimension(350, 175));
+		additionalInfoPanel.add(oversightInfoPanel);
 
 	}
 
