@@ -1,6 +1,7 @@
 package com.kluyuko.andrey.utils;
 
 import java.awt.Color;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -17,11 +18,11 @@ public class GUIUtils {
 	private GUIUtils() {
 	}
 
-	public static void addLabelToPanel(JPanel jPanel, double value) {
-		jPanel.add(new JLabel("x = " + value + ", "));
+	public static void addLabelToPanel(JPanel jPanel, double value, String type) {
+		jPanel.add(new JLabel(type + " = " + value + "; "));
 	}
 
-	public static void clearInputField(JTextField inputField) {
+	public static void notifySuccessful(JTextField inputField) {
 		inputField.setText("");
 		inputField.setBackground(Color.WHITE);
 	}
@@ -51,5 +52,57 @@ public class GUIUtils {
 			}
 		}
 		return value;
+	}
+
+	public static void addActualXY(JFrame self, JPanel panel, JTextField xValueTextField, JTextField yValueTextField,
+			List<Double> xExpected, List<Double> yExpected) {
+		double x = 0;
+		double y = 0;
+		boolean isXInputFielsValid = false;
+		boolean isYInputFielsValid = false;
+
+		x = GUIUtils.validateThatIsDouble(xValueTextField);
+		y = GUIUtils.validateThatIsDouble(yValueTextField);
+
+		// TODO maybe it should be refactored?????
+
+		if (!Double.isNaN(x)) {
+			if (!xExpected.contains(x)) {
+				isXInputFielsValid = true;
+				xExpected.add(x);
+			} else {
+				xValueTextField.setBackground(Color.PINK);
+				GUIUtils.showAlreadyAddedErrorDialog(self, "x", x);
+			}
+		} else {
+			GUIUtils.showIncorrectInputErrorDialog(self, "x", xValueTextField.getText());
+		}
+
+		if (!Double.isNaN(y)) {
+			if (!yExpected.contains(y)) {
+				isYInputFielsValid = true;
+				yExpected.add(y);
+			} else {
+				yValueTextField.setBackground(Color.PINK);
+				GUIUtils.showAlreadyAddedErrorDialog(self, "y", y);
+			}
+		} else {
+			GUIUtils.showIncorrectInputErrorDialog(self, "y", yValueTextField.getText());
+		}
+
+		if (isXInputFielsValid && isYInputFielsValid) {
+			GUIUtils.addLabelToPanel(panel, x, "x");
+			GUIUtils.addLabelToPanel(panel, y, "y");
+			GUIUtils.notifySuccessful(xValueTextField);
+			GUIUtils.notifySuccessful(yValueTextField);
+		}
+
+		panel.validate();
+		panel.repaint();
+	}
+
+	public static void addApproximatedXY() {
+		// TODO Auto-generated method stub
+		
 	}
 }

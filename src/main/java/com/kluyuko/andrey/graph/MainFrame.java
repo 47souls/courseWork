@@ -73,10 +73,12 @@ public class MainFrame extends JFrame {
 	private JPanel textFunctPanel;
 	private JPanel chooseFunctPanel;
 	private JLabel lblNewLabel;
-	private JComboBox comboBox;
-	private JLabel lblNewLabel_1;
-	private JComboBox comboBox_1;
+	private JComboBox functionComboBox;
+	private JLabel paramLabel;
+	private JComboBox eComboBox;
 	private JCheckBox approximationCheckBox;
+	private JPanel actualPointsPanel;
+	private JPanel approximatedPointsPanel;
 
 	public MainFrame() {
 		super("Дипломна робота");
@@ -109,10 +111,11 @@ public class MainFrame extends JFrame {
 		buttonsPanel.setPreferredSize(new Dimension(350, 100));
 		leftPanel.add(buttonsPanel);
 
-		JButton drawButton = new JButton("Намалювати графік");
+		final JButton drawButton = new JButton("Намалювати графік");
 		drawButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (!approximationCheckBox.isSelected()) {
+					drawButton.setText("Намалювати графік");
 					// Just painting graph from user`s x and y input
 					if (dataset.getSeries().contains(expected)) {
 						// Releasing dataset
@@ -123,12 +126,15 @@ public class MainFrame extends JFrame {
 						dataset.addSeries(expected);
 					}
 				} else {
+					drawButton.setText("Апроксимувати точки");
 					// Approximation and painting actual point from x input
 					// logic
 					if (dataset.getSeries().contains(actual)) {
 						dataset.removeSeries(actual);
 					} else {
-						Calculator calculator = new Calculator(xExpected, yExpected);
+						int typeIndex = functionComboBox.getSelectedIndex();
+						double eps = Double.parseDouble(eComboBox.getSelectedItem().toString());
+						Calculator calculator = new Calculator(xExpected, yExpected, typeIndex, eps);
 						constants = calculator.calculateConstants();
 
 						double x = GUIUtils.validateThatIsDouble(xValueTextField);
@@ -150,47 +156,17 @@ public class MainFrame extends JFrame {
 		JButton addPointsButton = new JButton("Додати точку");
 		addPointsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				double x = 0;
-				double y = 0;
-				boolean isInputFielsValid = false;
-
-				x = GUIUtils.validateThatIsDouble(xValueTextField);
-				y = GUIUtils.validateThatIsDouble(yValueTextField);
-
-				// TODO maybe it should be refactored?????
-
-				if (!Double.isNaN(x)) {
-					if (!xExpected.contains(x)) {
-						xExpected.add(x);
-						GUIUtils.clearInputField(xValueTextField);
-					} else {
-						GUIUtils.showAlreadyAddedErrorDialog(self, "x", x);
-					}
+				if (!approximationCheckBox.isSelected()) {
+					// Adding point to actual panel and graph
+					GUIUtils.addActualXY(self, actualPointsPanel, xValueTextField, yValueTextField, xExpected, yExpected);
 				} else {
-					GUIUtils.showIncorrectInputErrorDialog(self, "x", xValueTextField.getText());
+					// Adding point to approximation panel and graph
+					GUIUtils.addApproximatedXY();
 				}
 
-				if (!Double.isNaN(y)) {
-					if (!yExpected.contains(y)) {
-						yExpected.add(y);
-						GUIUtils.clearInputField(yValueTextField);
-						isInputFielsValid = true;
-					} else {
-						GUIUtils.showAlreadyAddedErrorDialog(self, "y", y);
-					}
-				} else {
-					GUIUtils.showIncorrectInputErrorDialog(self, "y", yValueTextField.getText());
-				}
-
-				if (isInputFielsValid) {
-					GUIUtils.addLabelToPanel(xyValuePanel, x);
-					GUIUtils.addLabelToPanel(xyValuePanel, y);
-				}
-
-				xyValuePanel.validate();
-				xyValuePanel.repaint();
 			}
 
+			
 		});
 		buttonsPanel.add(addPointsButton);
 
@@ -202,8 +178,8 @@ public class MainFrame extends JFrame {
 				 */
 				xExpected.clear();
 				yExpected.clear();
-				xyValuePanel.removeAll();
-				xyValuePanel.repaint();
+				actualPointsPanel.removeAll();
+				actualPointsPanel.repaint();
 			}
 		});
 		buttonsPanel.add(clearPointArrayButton);
@@ -244,8 +220,17 @@ public class MainFrame extends JFrame {
 		yValueTextField.addFocusListener(new InputFieldsFocusListener());
 
 		xyValuePanel = new JPanel();
+		xyValuePanel.setLayout(new BoxLayout(xyValuePanel, BoxLayout.X_AXIS));
 		xyValuePanel.setPreferredSize(new Dimension(350, 225));
 		rightPanel.add(xyValuePanel);
+
+		actualPointsPanel = new JPanel();
+		actualPointsPanel.setPreferredSize(new Dimension(175, 225));
+		xyValuePanel.add(actualPointsPanel);
+
+		approximatedPointsPanel = new JPanel();
+		approximatedPointsPanel.setPreferredSize(new Dimension(175, 225));
+		xyValuePanel.add(approximatedPointsPanel);
 
 		additionalInfoPanel = new JPanel();
 		additionalInfoPanel.setPreferredSize(new Dimension(350, 350));
@@ -271,21 +256,21 @@ public class MainFrame extends JFrame {
 		chooseFunctPanel = new JPanel();
 		typeOfFunctPanel.add(chooseFunctPanel);
 
-		comboBox = new JComboBox();
-		comboBox.setModel(new DefaultComboBoxModel(new String[] { "Мультиквадратична РБФ (МкРБФ)", "Обернена МкРБФ",
-				"Обернена квадратична РБФ", "Гаусівська РБФ" }));
-		chooseFunctPanel.add(comboBox);
+		functionComboBox = new JComboBox();
+		functionComboBox.setModel(new DefaultComboBoxModel(new String[] { "Мультиквадратична РБФ (МкРБФ)",
+				"Обернена МкРБФ", "Обернена квадратична РБФ", "Гаусівська РБФ" }));
+		chooseFunctPanel.add(functionComboBox);
 
 		typeOfParamPanel = new JPanel();
 		typeOfParamPanel.setPreferredSize(new Dimension(350, 75));
 		functInfoPanel.add(typeOfParamPanel);
 
-		lblNewLabel_1 = new JLabel("Параметр форми: E =");
-		typeOfParamPanel.add(lblNewLabel_1);
+		paramLabel = new JLabel("Параметр форми: E =");
+		typeOfParamPanel.add(paramLabel);
 
-		comboBox_1 = new JComboBox();
-		comboBox_1.setModel(new DefaultComboBoxModel(new String[] { "0.5", "1.0", "5.0" }));
-		typeOfParamPanel.add(comboBox_1);
+		eComboBox = new JComboBox();
+		eComboBox.setModel(new DefaultComboBoxModel(new String[] { "0.5", "1.0", "5.0" }));
+		typeOfParamPanel.add(eComboBox);
 
 		oversightInfoPanel = new JPanel();
 		oversightInfoPanel.setPreferredSize(new Dimension(350, 175));

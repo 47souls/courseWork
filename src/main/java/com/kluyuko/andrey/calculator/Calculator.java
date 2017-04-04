@@ -13,15 +13,18 @@ public class Calculator {
 	private List<Double> constants;
 	private List<Double> x;
 	private List<Double> y;
-	public final static double E = 1;
+	public int typeIndex;
+	public double e;
 
 	@SuppressWarnings("unused")
 	private Calculator() {
 	}
 
-	public Calculator(List<Double> x, List<Double> y) {
+	public Calculator(List<Double> x, List<Double> y, int typeIndex, double e) {
 		this.x = x;
 		this.y = y;
+		this.typeIndex = typeIndex;
+		this.e = e;
 	}
 
 	public List<Double> getConstants() {
@@ -75,7 +78,6 @@ public class Calculator {
 	// calculation specific methods
 
 	public List<Double> calculateConstants() {
-
 		int counter = 0;
 		int numberOfLines = x.size();
 		double fi[][] = new double[numberOfLines][numberOfLines];
@@ -85,19 +87,36 @@ public class Calculator {
 		for (int i = 0; i < x.size(); i++) {
 			oldX.add(i, x.get(i));
 		}
-		
+
 		for (int i = 0; i < y.size(); i++) {
 			oldY.add(i, y.get(i));
 		}
 
 		/* Calculating fi[][] using radial function */
+
 		for (int i = 0; i < numberOfLines; i++) {
 			for (int j = 0; j < numberOfLines; j++) {
-				fi[i][j] = multiQuadroRadialFunction(radius(oldX.get(i), oldX.get(j)), E);
+				fi[i][j] = multiQuadroRadialFunction(radius(oldX.get(i), oldX.get(j)), e);
+				switch (typeIndex) {
+				case 0:
+					fi[i][j] = multiQuadroRadialFunction(radius(oldX.get(i), oldX.get(j)), e);
+					break;
+				case 1:
+					fi[i][j] = revertedMultiQuadroRadialFunction(radius(oldX.get(i), oldX.get(j)), e);
+					break;
+				case 2:
+					fi[i][j] = revertedQuadroRadialFunction(radius(oldX.get(i), oldX.get(j)), e);
+					break;
+				case 3:
+					fi[i][j] = gaussRadialFunction(radius(oldX.get(i), oldX.get(j)), e);
+					break;
+				}
+
 				System.out.print(fi[i][j] + " ");
 			}
 			System.out.println();
 		}
+
 		System.out.println("Y= ");
 		for (int i = 0; i < numberOfLines; i++) {
 			System.out.println(y.get(i));
@@ -147,7 +166,21 @@ public class Calculator {
 			System.out.println("constants.get(i)" + constants.get(i));
 			System.out.println("X.get(i): " + x.get(i));
 			double radius = radius(point, x.get(i));
-			fi = multiQuadroRadialFunction(radius, E);
+			switch (typeIndex) {
+			case 0:
+				fi = multiQuadroRadialFunction(radius, e);
+				break;
+			case 1:
+				fi = revertedMultiQuadroRadialFunction(radius, e);
+				break;
+			case 2:
+				fi = revertedQuadroRadialFunction(radius, e);
+				break;
+			case 3:
+				fi = gaussRadialFunction(radius, e);
+				break;
+			}
+			fi = multiQuadroRadialFunction(radius, e);
 			System.out.println("fi(i) = " + fi);
 			sum += constants.get(i) * fi;
 		}
