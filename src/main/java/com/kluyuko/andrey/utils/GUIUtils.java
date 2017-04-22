@@ -4,9 +4,8 @@ import java.awt.Color;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class GUIUtils {
@@ -18,11 +17,15 @@ public class GUIUtils {
 	private GUIUtils() {
 	}
 
-	public static void addLabelToPanel(JPanel jPanel, double value, String type) {
-		jPanel.add(new JLabel(type + " = " + value + "; "));
+	public static void addLabelToPanel(JTextArea textArea, double value, String type, boolean newLine) {
+		if (newLine) {
+			textArea.append(type + " = " + value + "; " + "\n");
+		} else {
+			textArea.append(type + " = " + value + "; ");
+		}
 	}
 
-	public static void notifySuccessful(JTextField inputField) {
+	public static void clearTextFields(JTextField inputField) {
 		inputField.setText("");
 		inputField.setBackground(Color.WHITE);
 	}
@@ -54,8 +57,8 @@ public class GUIUtils {
 		return value;
 	}
 
-	public static void addActualXY(JFrame self, JPanel panel, JTextField xValueTextField, JTextField yValueTextField,
-			List<Double> xExpected, List<Double> yExpected) {
+	public static void addActualXY(JFrame self, JTextArea textArea, JTextField xValueTextField,
+			JTextField yValueTextField, List<Double> xExpected, List<Double> yExpected) {
 		double x = 0;
 		double y = 0;
 		boolean isXInputFielsValid = false;
@@ -91,18 +94,15 @@ public class GUIUtils {
 		}
 
 		if (isXInputFielsValid && isYInputFielsValid) {
-			GUIUtils.addLabelToPanel(panel, x, "x");
-			GUIUtils.addLabelToPanel(panel, y, "y");
-			GUIUtils.notifySuccessful(xValueTextField);
-			GUIUtils.notifySuccessful(yValueTextField);
+			GUIUtils.addLabelToPanel(textArea, x, xExpected.size() + ") " + "x", false);
+			GUIUtils.addLabelToPanel(textArea, y, "y", true);
+			GUIUtils.clearTextFields(xValueTextField);
+			GUIUtils.clearTextFields(yValueTextField);
 		}
-
-		panel.validate();
-		panel.repaint();
 	}
 
 	public static void addApproximatedXY() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

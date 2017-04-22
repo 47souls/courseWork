@@ -8,10 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.jfree.chart.ChartFactory;
@@ -25,9 +30,6 @@ import com.kluyuko.andrey.listener.ApproximatePointsItemListener;
 import com.kluyuko.andrey.listener.InputFieldsFocusListener;
 import com.kluyuko.andrey.utils.GUIUtils;
 import com.kluyuko.andrey.utils.GraphUtils;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -37,8 +39,7 @@ public class MainFrame extends JFrame {
 	private List<Double> xActual;
 	private List<Double> yActual;
 	private List<Double> constants;
-	private boolean isInputtingExpectedNumbers;
-	private String chartTitle = "Апроксимація методом радіально-базисних функцій";
+	private String chartTitle = "Апроксимація методом радіальних-базисних функцій";
 	private String xAxisLabel = "X";
 	private String yAxisLabel = "Y";
 
@@ -54,7 +55,6 @@ public class MainFrame extends JFrame {
 	private JFrame self = this;
 	private JPanel leftPanel;
 	private JPanel rightPanel;
-	private JPanel graphPanel;
 	private JPanel buttonsPanel;
 	private JPanel labelPanel;
 	private JPanel xyValuePanel;
@@ -67,18 +67,31 @@ public class MainFrame extends JFrame {
 	private JTextField yValueTextField;
 	private JPanel additionalInfoPanel;
 	private JPanel functInfoPanel;
-	private JPanel oversightInfoPanel;
+	private JPanel availableFunctionPanel;
 	private JPanel typeOfFunctPanel;
 	private JPanel typeOfParamPanel;
 	private JPanel textFunctPanel;
 	private JPanel chooseFunctPanel;
 	private JLabel lblNewLabel;
-	private JComboBox functionComboBox;
+	private JComboBox<String> functionComboBox;
 	private JLabel paramLabel;
-	private JComboBox eComboBox;
+	private JComboBox<String> eComboBox;
 	private JCheckBox approximationCheckBox;
 	private JPanel actualPointsPanel;
 	private JPanel approximatedPointsPanel;
+	private JPanel infoPanel;
+	private JPanel choosePanel;
+	private JComboBox<String> comboBox;
+	private JTextField fromTextField;
+	private JTextField toTextField;
+	private JLabel fromTextLabel;
+	private JLabel toTextLabel;
+	private JLabel nOfDivisionsTextLabel;
+	private JTextField nOfDivisionsTextField;
+	private JTextArea actualArea;
+	private JTextArea approximatedArea;
+	private JScrollPane approximatedScrollPane;
+	private JScrollPane actualScrollPane;
 
 	public MainFrame() {
 		super("Дипломна робота");
@@ -134,7 +147,7 @@ public class MainFrame extends JFrame {
 					} else {
 						int typeIndex = functionComboBox.getSelectedIndex();
 						double eps = Double.parseDouble(eComboBox.getSelectedItem().toString());
-						Calculator calculator = new Calculator(xExpected, yExpected, typeIndex, eps);
+						calculator = new Calculator(xExpected, yExpected, typeIndex, eps);
 						constants = calculator.calculateConstants();
 
 						double x = GUIUtils.validateThatIsDouble(xValueTextField);
@@ -158,7 +171,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (!approximationCheckBox.isSelected()) {
 					// Adding point to actual panel and graph
-					GUIUtils.addActualXY(self, actualPointsPanel, xValueTextField, yValueTextField, xExpected, yExpected);
+					GUIUtils.addActualXY(self, actualArea, xValueTextField, yValueTextField, xExpected, yExpected);
 				} else {
 					// Adding point to approximation panel and graph
 					GUIUtils.addApproximatedXY();
@@ -173,9 +186,6 @@ public class MainFrame extends JFrame {
 		JButton clearPointArrayButton = new JButton("Очистити масив точок");
 		clearPointArrayButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				/*
-				 * TODO 1) Think about refactoring of this shit
-				 */
 				xExpected.clear();
 				yExpected.clear();
 				actualPointsPanel.removeAll();
@@ -213,7 +223,7 @@ public class MainFrame extends JFrame {
 		yValueTextField.setColumns(10);
 
 		approximationCheckBox = new JCheckBox("Режим апроксимації");
-		approximationCheckBox.addItemListener(new ApproximatePointsItemListener(yValueTextField));
+		approximationCheckBox.addItemListener(new ApproximatePointsItemListener(xValueTextField, yValueTextField, addPointsButton));
 		inputPointsPanel.add(approximationCheckBox);
 
 		xValueTextField.addFocusListener(new InputFieldsFocusListener());
@@ -227,10 +237,24 @@ public class MainFrame extends JFrame {
 		actualPointsPanel = new JPanel();
 		actualPointsPanel.setPreferredSize(new Dimension(175, 225));
 		xyValuePanel.add(actualPointsPanel);
-
+		
 		approximatedPointsPanel = new JPanel();
 		approximatedPointsPanel.setPreferredSize(new Dimension(175, 225));
 		xyValuePanel.add(approximatedPointsPanel);
+		
+		actualArea = new JTextArea();
+		actualArea.setEditable(false);
+		actualArea.setPreferredSize(new Dimension(120, 180));
+		actualScrollPane = new JScrollPane(actualArea);
+		actualScrollPane.setPreferredSize(new Dimension(120, 180));
+		actualPointsPanel.add(actualScrollPane);
+		
+		approximatedArea = new JTextArea();
+		approximatedArea.setEditable(false);
+		approximatedArea.setPreferredSize(new Dimension(120, 180));
+		approximatedScrollPane = new JScrollPane(approximatedArea);
+		approximatedScrollPane.setPreferredSize(new Dimension(120, 180));
+		approximatedPointsPanel.add(approximatedScrollPane);
 
 		additionalInfoPanel = new JPanel();
 		additionalInfoPanel.setPreferredSize(new Dimension(350, 350));
@@ -256,8 +280,8 @@ public class MainFrame extends JFrame {
 		chooseFunctPanel = new JPanel();
 		typeOfFunctPanel.add(chooseFunctPanel);
 
-		functionComboBox = new JComboBox();
-		functionComboBox.setModel(new DefaultComboBoxModel(new String[] { "Мультиквадратична РБФ (МкРБФ)",
+		functionComboBox = new JComboBox<>();
+		functionComboBox.setModel(new DefaultComboBoxModel<String>(new String[] { "Мультиквадратична РБФ (МкРБФ)",
 				"Обернена МкРБФ", "Обернена квадратична РБФ", "Гаусівська РБФ" }));
 		chooseFunctPanel.add(functionComboBox);
 
@@ -268,13 +292,45 @@ public class MainFrame extends JFrame {
 		paramLabel = new JLabel("Параметр форми: E =");
 		typeOfParamPanel.add(paramLabel);
 
-		eComboBox = new JComboBox();
-		eComboBox.setModel(new DefaultComboBoxModel(new String[] { "0.5", "1.0", "5.0" }));
+		eComboBox = new JComboBox<String>();
+		eComboBox.setModel(new DefaultComboBoxModel<String>(new String[] { "0.5", "1.0", "5.0" }));
 		typeOfParamPanel.add(eComboBox);
 
-		oversightInfoPanel = new JPanel();
-		oversightInfoPanel.setPreferredSize(new Dimension(350, 175));
-		additionalInfoPanel.add(oversightInfoPanel);
+		availableFunctionPanel = new JPanel();
+		availableFunctionPanel.setLayout(new BoxLayout(availableFunctionPanel, BoxLayout.Y_AXIS));
+		availableFunctionPanel.setPreferredSize(new Dimension(350, 175));
+		additionalInfoPanel.add(availableFunctionPanel);
+		
+		infoPanel = new JPanel();
+		availableFunctionPanel.add(infoPanel);
+		
+		fromTextLabel = new JLabel("Від");
+		infoPanel.add(fromTextLabel);
+		
+		fromTextField = new JTextField();
+		infoPanel.add(fromTextField);
+		fromTextField.setColumns(8);
+		
+		toTextLabel = new JLabel("до");
+		infoPanel.add(toTextLabel);
+		
+		toTextField = new JTextField();
+		infoPanel.add(toTextField);
+		toTextField.setColumns(8);
+		
+		nOfDivisionsTextLabel = new JLabel("Кількість поділів");
+		infoPanel.add(nOfDivisionsTextLabel);
+		
+		nOfDivisionsTextField = new JTextField();
+		infoPanel.add(nOfDivisionsTextField);
+		nOfDivisionsTextField.setColumns(10);
+		
+		choosePanel = new JPanel();
+		availableFunctionPanel.add(choosePanel);
+		
+		comboBox = new JComboBox<String>();
+		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"sin(x)", "cos(x)", "1/x", "1/x^2"}));
+		choosePanel.add(comboBox);
 
 	}
 
