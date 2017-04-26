@@ -16,23 +16,24 @@ public class Calculator {
 	public int typeIndex;
 	public double e;
 
-	@SuppressWarnings("unused")
-	private Calculator() {
+	private Calculator(List<Double> x, List<Double> y) {
+		this.x = x;
+		this.y = y;
 	}
 
-	public Calculator(List<Double> x, List<Double> y, int typeIndex, double e) {
+	private Calculator(List<Double> x, List<Double> y, int typeIndex, double e) {
 		this.x = x;
 		this.y = y;
 		this.typeIndex = typeIndex;
 		this.e = e;
 	}
 
-	public List<Double> getConstants() {
-		return constants;
+	public static Calculator createCalculatorFromConstants(List<Double> x, List<Double> y) {
+		return new Calculator(x, y);
 	}
 
-	public void setConstants(List<Double> constants) {
-		this.constants = constants;
+	public static Calculator createCalculator(List<Double> x, List<Double> y, int typeIndex, double e) {
+		return new Calculator(x, y, typeIndex, e);
 	}
 
 	public List<Double> getX() {
@@ -49,6 +50,22 @@ public class Calculator {
 
 	public void setY(List<Double> y) {
 		this.y = y;
+	}
+
+	public int getTypeIndex() {
+		return typeIndex;
+	}
+
+	public void setTypeIndex(int typeIndex) {
+		this.typeIndex = typeIndex;
+	}
+
+	public double getE() {
+		return e;
+	}
+
+	public void setE(double e) {
+		this.e = e;
 	}
 
 	// radius function
@@ -96,7 +113,6 @@ public class Calculator {
 
 		for (int i = 0; i < numberOfLines; i++) {
 			for (int j = 0; j < numberOfLines; j++) {
-				fi[i][j] = multiQuadroRadialFunction(radius(oldX.get(i), oldX.get(j)), e);
 				switch (typeIndex) {
 				case 0:
 					fi[i][j] = multiQuadroRadialFunction(radius(oldX.get(i), oldX.get(j)), e);
@@ -111,7 +127,6 @@ public class Calculator {
 					fi[i][j] = gaussRadialFunction(radius(oldX.get(i), oldX.get(j)), e);
 					break;
 				}
-
 				System.out.print(fi[i][j] + " ");
 			}
 			System.out.println();
@@ -156,10 +171,11 @@ public class Calculator {
 		for (int i = 0; i < numberOfLines; i++) {
 			System.out.println(oldX.get(i));
 		}
+		constants = oldX;
 		return oldX;
 	}
 
-	public double approximate(List<Double> constants, List<Double> x, double point) {
+	public double approximate(double point) {
 		double sum = 0;
 		double fi = 0;
 		for (int i = 0; i < constants.size(); i++) {
@@ -167,23 +183,23 @@ public class Calculator {
 			System.out.println("X.get(i): " + x.get(i));
 			double radius = radius(point, x.get(i));
 			switch (typeIndex) {
-			case 0:
-				fi = multiQuadroRadialFunction(radius, e);
-				break;
-			case 1:
-				fi = revertedMultiQuadroRadialFunction(radius, e);
-				break;
-			case 2:
-				fi = revertedQuadroRadialFunction(radius, e);
-				break;
-			case 3:
-				fi = gaussRadialFunction(radius, e);
-				break;
+				case 0:
+					fi = multiQuadroRadialFunction(radius, e);
+					break;
+				case 1:
+					fi = revertedMultiQuadroRadialFunction(radius, e);
+					break;
+				case 2:
+					fi = revertedQuadroRadialFunction(radius, e);
+					break;
+				case 3:
+					fi = gaussRadialFunction(radius, e);
+					break;
 			}
-			fi = multiQuadroRadialFunction(radius, e);
-			System.out.println("fi(i) = " + fi);
+			
 			sum += constants.get(i) * fi;
 		}
+		System.out.println("Sum : " + sum);
 		return sum;
 	}
 

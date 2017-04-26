@@ -2,7 +2,7 @@ package com.kluyuko.andrey;
 
 import javax.swing.SwingUtilities;
 
-import com.kluyuko.andrey.graph.MainFrame;
+import com.kluyuko.andrey.frame.MainFrame;
 
 public class Main {
 
