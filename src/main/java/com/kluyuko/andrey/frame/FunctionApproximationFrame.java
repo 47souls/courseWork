@@ -33,13 +33,13 @@ import com.kluyuko.andrey.utils.GUIUtils;
 import com.kluyuko.andrey.utils.GraphUtils;
 
 @SuppressWarnings("serial")
-public class MainFrame extends JFrame {
+public class FunctionApproximationFrame extends JFrame {
 
 	private List<Double> xExpected;
 	private List<Double> yExpected;
 	private List<Double> xActual;
 	private List<Double> yActual;
-	private String chartTitle = "Апроксимація методом радіальних-базисних функцій";
+	private String chartTitle = "Апроксимація функцій методом радіальних-базисних функцій";
 	private String xAxisLabel = "X";
 	private String yAxisLabel = "Y";
 
@@ -99,12 +99,22 @@ public class MainFrame extends JFrame {
 	private JLabel lblSdf;
 	private JLabel lblNewLabel_1;
 	private JPanel panel;
-	private JPanel panel_1;
-	private JLabel lblNewLabel_2;
-	private JTextField textField;
+	private JPanel oversightPanel;
 	private JButton fillDataButton;
+	private JPanel panel_1;
+	private JPanel panel_2;
+	private JPanel panel_3;
+	private JPanel panel_4;
+	private JLabel oversight1Label;
+	private JTextField oversight1ValueTextField;
+	private JLabel oversight2Label;
+	private JTextField oversight2ValueTextField;
+	private JLabel lbll;
+	private JTextField oversight1PercentageTextField;
+	private JLabel label;
+	private JTextField oversight2PercentageTextField;
 
-	public MainFrame() {
+	public FunctionApproximationFrame() {
 		super("Дипломна робота");
 		xExpected = new ArrayList<>();
 		yExpected = new ArrayList<>();
@@ -240,12 +250,13 @@ public class MainFrame extends JFrame {
 		approximationCheckBox = new JCheckBox("Режим апрокcимації");
 		approximationCheckBox
 				.addItemListener(new ApproximatePointsItemListener(xValueTextField, yValueTextField, drawButton));
-		
+
 		fillDataButton = new JButton("Згенерувати дані");
 		fillDataButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Generating data using declared functions
-				GUIUtils.addGeneratedData(self, actualArea, fromTextField, toTextField, nOfDivisionsTextField, functionGeneratedComboBox.getSelectedIndex() , xExpected, yExpected);
+				GUIUtils.addGeneratedData(self, actualArea, fromTextField, toTextField, nOfDivisionsTextField,
+						functionGeneratedComboBox.getSelectedIndex(), xExpected, yExpected);
 			}
 		});
 		buttonsPanel.add(fillDataButton);
@@ -312,7 +323,7 @@ public class MainFrame extends JFrame {
 
 		functInfoPanel = new JPanel();
 		functInfoPanel.setLayout(new BoxLayout(functInfoPanel, BoxLayout.Y_AXIS));
-		functInfoPanel.setPreferredSize(new Dimension(350, 45));
+		functInfoPanel.setPreferredSize(new Dimension(350, 55));
 		additionalInfoPanel.add(functInfoPanel);
 
 		typeOfFunctPanel = new JPanel();
@@ -321,14 +332,14 @@ public class MainFrame extends JFrame {
 		functInfoPanel.add(typeOfFunctPanel);
 
 		textFunctPanel = new JPanel();
-		textFunctPanel.setPreferredSize(new Dimension(350, 5));
+		textFunctPanel.setPreferredSize(new Dimension(350, 7));
 		typeOfFunctPanel.add(textFunctPanel);
 
 		lblNewLabel = new JLabel("Тип апроксимаційної функції");
 		textFunctPanel.add(lblNewLabel);
 
 		chooseFunctPanel = new JPanel();
-		chooseFunctPanel.setPreferredSize(new Dimension(350, 20));
+		chooseFunctPanel.setPreferredSize(new Dimension(350, 17));
 		typeOfFunctPanel.add(chooseFunctPanel);
 
 		functionComboBox = new JComboBox<>();
@@ -337,7 +348,7 @@ public class MainFrame extends JFrame {
 		chooseFunctPanel.add(functionComboBox);
 
 		typeOfParamPanel = new JPanel();
-		typeOfParamPanel.setPreferredSize(new Dimension(350, 20));
+		typeOfParamPanel.setPreferredSize(new Dimension(350, 18));
 		functInfoPanel.add(typeOfParamPanel);
 
 		paramLabel = new JLabel("Параметр форми: E =");
@@ -353,7 +364,7 @@ public class MainFrame extends JFrame {
 		additionalInfoPanel.add(availableFunctionPanel);
 
 		infoPanel = new JPanel();
-		infoPanel.setPreferredSize(new Dimension(350, 35));
+		infoPanel.setPreferredSize(new Dimension(350, 25));
 		availableFunctionPanel.add(infoPanel);
 
 		fromTextLabel = new JLabel("Від");
@@ -379,27 +390,66 @@ public class MainFrame extends JFrame {
 
 		choosePanel = new JPanel();
 		choosePanel.setLayout(new BoxLayout(choosePanel, BoxLayout.Y_AXIS));
-		choosePanel.setPreferredSize(new Dimension(350, 140));
+		choosePanel.setPreferredSize(new Dimension(350, 10));
 		availableFunctionPanel.add(choosePanel);
 
 		panel = new JPanel();
-		panel.setPreferredSize(new Dimension(350, 15));
+		panel.setPreferredSize(new Dimension(350, 10));
 		choosePanel.add(panel);
 
 		functionGeneratedComboBox = new JComboBox<String>();
 		panel.add(functionGeneratedComboBox);
-		functionGeneratedComboBox.setModel(new DefaultComboBoxModel<String>(new String[] { "sin(x)", "cos(x)", "1/x", "1/x^2" }));
+		functionGeneratedComboBox
+				.setModel(new DefaultComboBoxModel<String>(new String[] { "sin(x)", "cos(x)", "1/x", "1/x^2" }));
+
+		oversightPanel = new JPanel();
+		oversightPanel.setLayout(new BoxLayout(oversightPanel, BoxLayout.Y_AXIS));
+		availableFunctionPanel.add(oversightPanel);
+		oversightPanel.setPreferredSize(new Dimension(350, 28));
 
 		panel_1 = new JPanel();
-		panel_1.setPreferredSize(new Dimension(350, 125));
-		choosePanel.add(panel_1);
+		panel_1.setPreferredSize(new Dimension(350, 7));
+		oversightPanel.add(panel_1);
 
-		lblNewLabel_2 = new JLabel("Похибка 1");
-		panel_1.add(lblNewLabel_2);
+		oversight1Label = new JLabel("Похибка обчислень для значення\r\n");
+		panel_1.add(oversight1Label);
 
-		textField = new JTextField();
-		panel_1.add(textField);
-		textField.setColumns(10);
+		panel_2 = new JPanel();
+		panel_2.setPreferredSize(new Dimension(350, 7));
+		oversightPanel.add(panel_2);
+
+		oversight1ValueTextField = new JTextField();
+		panel_2.add(oversight1ValueTextField);
+		oversight1ValueTextField.setColumns(10);
+		
+		lbll = new JLabel("=");
+		panel_2.add(lbll);
+		
+		oversight1PercentageTextField = new JTextField();
+		panel_2.add(oversight1PercentageTextField);
+		oversight1PercentageTextField.setColumns(10);
+
+		panel_3 = new JPanel();
+		panel_3.setPreferredSize(new Dimension(350, 7));
+		oversightPanel.add(panel_3);
+
+		oversight2Label = new JLabel("Якась інша похибка обчислень");
+		panel_3.add(oversight2Label);
+
+		panel_4 = new JPanel();
+		panel_4.setPreferredSize(new Dimension(350, 7));
+		oversightPanel.add(panel_4);
+
+		oversight2ValueTextField = new JTextField();
+		panel_4.add(oversight2ValueTextField);
+		oversight2ValueTextField.setColumns(10);
+		
+		label = new JLabel("=");
+		panel_4.add(label);
+		
+		oversight2PercentageTextField = new JTextField();
+		panel_4.add(oversight2PercentageTextField);
+		oversight2PercentageTextField.setColumns(10);
 
 	}
 

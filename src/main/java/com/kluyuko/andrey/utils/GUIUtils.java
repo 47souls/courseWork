@@ -19,9 +19,9 @@ public class GUIUtils {
 
 	public static void addLabelToPanel(JTextArea textArea, double value, String type, boolean newLine) {
 		if (newLine) {
-			textArea.append(type + " = " + String.format( "%.2f", value) + "; " + "\n");
+			textArea.append(type + " = " + String.format("%.3f", value) + "; " + "\n");
 		} else {
-			textArea.append(type + " = " + String.format( "%.2f", value) + "; ");
+			textArea.append(type + " = " + String.format("%.3f", value) + "; ");
 		}
 	}
 
@@ -31,20 +31,20 @@ public class GUIUtils {
 	}
 
 	public static void showAlreadyAddedErrorDialog(JFrame frame, String which, double value) {
-		JOptionPane.showMessageDialog(frame, "Значення " + which + " = " + value + " вже додано!", "Помилка вводу даних",
-				JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(frame, "Значення " + which + " = " + value + " вже додано!",
+				"Помилка вводу даних", JOptionPane.ERROR_MESSAGE);
 	}
 
 	public static void showIncorrectInputErrorDialog(JFrame frame, String which, String value) {
-		JOptionPane.showMessageDialog(frame, "Значення " + which + " = " + value + " не є числом!", "Помилка вводу даних",
-				JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(frame, "Значення " + which + " = " + value + " не є числом!",
+				"Помилка вводу даних", JOptionPane.ERROR_MESSAGE);
 	}
-	
+
 	public static void showIncorrectRangeDialog(JFrame frame, String from, String to) {
 		JOptionPane.showMessageDialog(frame, "Значення " + from + " більше за  " + to, "Помилка вводу даних",
 				JOptionPane.ERROR_MESSAGE);
 	}
-	
+
 	public static void showIncorrectNDialog(JFrame frame, String n) {
 		JOptionPane.showMessageDialog(frame, "Значення " + n + " більше нуля!", "Помилка вводу даних",
 				JOptionPane.ERROR_MESSAGE);
@@ -89,6 +89,7 @@ public class GUIUtils {
 			}
 		} else {
 			showIncorrectInputErrorDialog(self, "x", xValueTextField.getText());
+			xValueTextField.setBackground(Color.PINK);
 		}
 
 		if (!Double.isNaN(y)) {
@@ -101,6 +102,7 @@ public class GUIUtils {
 			}
 		} else {
 			showIncorrectInputErrorDialog(self, "y", yValueTextField.getText());
+			yValueTextField.setBackground(Color.PINK);
 		}
 
 		if (isXInputFielsValid && isYInputFielsValid) {
@@ -139,13 +141,14 @@ public class GUIUtils {
 		}
 	}
 
-	public static void addGeneratedData(JFrame self, JTextArea textArea, JTextField fromTextField, JTextField toTextField, JTextField nOfDivisionsTextField, int selectedIndex,
-			List<Double> xActual, List<Double> yActual) {
+	public static void addGeneratedData(JFrame self, JTextArea textArea, JTextField fromTextField,
+			JTextField toTextField, JTextField nOfDivisionsTextField, int selectedIndex, List<Double> xActual,
+			List<Double> yActual) {
 		double value;
-		
+
 		xActual.clear();
 		yActual.clear();
-		
+
 		double from = validateThatIsDouble(fromTextField);
 		double to = validateThatIsDouble(toTextField);
 		double n = validateThatIsDouble(nOfDivisionsTextField);
@@ -155,28 +158,28 @@ public class GUIUtils {
 				for (double i = from; i <= to; i += (to - from) / n) {
 					xActual.add(i);
 					addLabelToPanel(textArea, i, xActual.size() + ") " + "x", false);
-					
+
 					switch (selectedIndex) {
-						case 0:
-							value = Math.sin(i);
-							yActual.add(value);
-							addLabelToPanel(textArea, value, "y", true);
-							break;
-						case 1:
-							value = Math.cos(i);
-							yActual.add(value);
-							addLabelToPanel(textArea, value, "y", true);
-							break;
-						case 2:
-							value = 1 / i;
-							yActual.add(value);
-							addLabelToPanel(textArea, value, "y", true);
-							break;
-						case 3:
-							value = 1 / Math.pow(i, 2);
-							yActual.add(value);
-							addLabelToPanel(textArea, value, "y", true);
-							break;
+					case 0:
+						value = Math.sin(i);
+						yActual.add(value);
+						addLabelToPanel(textArea, value, "y", true);
+						break;
+					case 1:
+						value = Math.cos(i);
+						yActual.add(value);
+						addLabelToPanel(textArea, value, "y", true);
+						break;
+					case 2:
+						value = 1 / i;
+						yActual.add(value);
+						addLabelToPanel(textArea, value, "y", true);
+						break;
+					case 3:
+						value = 1 / Math.pow(i, 2);
+						yActual.add(value);
+						addLabelToPanel(textArea, value, "y", true);
+						break;
 					}
 				}
 			} else {
@@ -186,6 +189,6 @@ public class GUIUtils {
 		} else {
 			showIncorrectRangeDialog(self, Double.toString(from), Double.toString(to));
 		}
-		
+
 	}
 }
