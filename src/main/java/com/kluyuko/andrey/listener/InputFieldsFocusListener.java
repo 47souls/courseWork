@@ -1,10 +1,9 @@
 package com.kluyuko.andrey.listener;
 
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-
-import javax.swing.JTextField;
 
 public class InputFieldsFocusListener implements FocusListener {
 
@@ -19,6 +18,8 @@ public class InputFieldsFocusListener implements FocusListener {
 	public InputFieldsFocusListener() {
 	}
 
+
+
 	@Override
 	public void focusGained(FocusEvent e) {
 		JTextField textField = (JTextField) e.getSource();
@@ -30,7 +31,7 @@ public class InputFieldsFocusListener implements FocusListener {
 	public void focusLost(FocusEvent e) {
 		JTextField textField = (JTextField) e.getSource();
 		String text = textField.getText();
-		if (text != null && !text.isEmpty()) {
+		if (text != null && !text.equals("")) {
 			try {
 				Double.parseDouble(text);
 				textField.setBackground(SUCCESS_COLOUR);
